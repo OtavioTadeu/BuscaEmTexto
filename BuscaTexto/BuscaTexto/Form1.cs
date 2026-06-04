@@ -22,18 +22,45 @@ namespace BuscaTexto {
                MessageBoxIcon.Information);
         }
 
-        private void abrirToolStripMenuItem_Click(object sender, EventArgs e) {
-            using (OpenFileDialog ofd = new OpenFileDialog()) {
-                ofd.Filter = "Text files (*.txt)|*.txt|Rich Text Format (*.rtf)|*.rtf";
-                if (ofd.ShowDialog() == DialogResult.OK) {
-                    if (ofd.FileName.EndsWith(".rtf", StringComparison.OrdinalIgnoreCase)) {
-                        texto.LoadFile(ofd.FileName, RichTextBoxStreamType.RichText);
-                    } else {
-                        texto.LoadFile(ofd.FileName, RichTextBoxStreamType.PlainText);
-                    }
+        private void abrirToolStripMenuItem_Click(object sender, EventArgs e)
+{
+    using (OpenFileDialog ofd = new OpenFileDialog())
+    {
+        ofd.Filter = "Arquivos de Texto e RTF|*.txt;*.rtf|Arquivos de Texto (*.txt)|*.txt|Rich Text Format (*.rtf)|*.rtf";
+
+        if (ofd.ShowDialog() == DialogResult.OK)
+        {
+            try
+            {
+                if (ofd.FileName.EndsWith(".rtf", StringComparison.OrdinalIgnoreCase))
+                {
+                    texto.LoadFile(ofd.FileName, RichTextBoxStreamType.RichText);
+                }
+                else
+                {
+                    texto.LoadFile(ofd.FileName, RichTextBoxStreamType.PlainText);
                 }
             }
+            catch (ArgumentException)
+            {
+                // Se o RTF falhar por formato inválido, tenta abrir como texto puro
+                try
+                {
+                    texto.LoadFile(ofd.FileName, RichTextBoxStreamType.PlainText);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Não foi possível ler o arquivo: {ex.Message}", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Captura qualquer outro erro inesperado (arquivo bloqueado, sem permissão, etc.)
+                MessageBox.Show($"Erro ao abrir o arquivo: {ex.Message}", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
+    }
+}
 
         private void sairToolStripMenuItem_Click(object sender, EventArgs e) {
             Application.Exit();
