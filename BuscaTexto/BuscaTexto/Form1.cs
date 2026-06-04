@@ -32,31 +32,31 @@ namespace BuscaTexto {
         {
             try
             {
+                // Tenta abrir como rtf primeiro
                 if (ofd.FileName.EndsWith(".rtf", StringComparison.OrdinalIgnoreCase))
                 {
-                    texto.LoadFile(ofd.FileName, RichTextBoxStreamType.RichText);
+                    try
+                    {
+                        texto.LoadFile(ofd.FileName, RichTextBoxStreamType.RichText);
+                    }
+                    catch (ArgumentException)
+                    {
+                        // Se falhar, significa que é um .txt disfarçado de .rtf
+                        // Então lê como texto puro em UTF-8
+                        string conteudo = File.ReadAllText(ofd.FileName, System.Text.Encoding.UTF8);
+                        texto.Text = conteudo;
+                    }
                 }
                 else
                 {
-                    texto.LoadFile(ofd.FileName, RichTextBoxStreamType.PlainText);
-                }
-            }
-            catch (ArgumentException)
-            {
-                // Se o RTF falhar por formato inválido, tenta abrir como texto puro
-                try
-                {
-                    texto.LoadFile(ofd.FileName, RichTextBoxStreamType.PlainText);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Não foi possível ler o arquivo: {ex.Message}", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    // Se for .txt de fábrica, lê direto como texto puro UTF-8
+                    string conteudo = File.ReadAllText(ofd.FileName, System.Text.Encoding.UTF8);
+                    texto.Text = conteudo;
                 }
             }
             catch (Exception ex)
             {
-                // Captura qualquer outro erro inesperado (arquivo bloqueado, sem permissão, etc.)
-                MessageBox.Show($"Erro ao abrir o arquivo: {ex.Message}", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Erro crítico ao abrir o arquivo: {ex.Message}", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
     }
