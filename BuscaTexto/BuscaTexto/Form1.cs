@@ -1,89 +1,102 @@
 using System;
+using System.IO;
 using System.Windows.Forms;
 
-namespace BuscaTexto {
-    public partial class Form1 : Form {
+namespace BuscaTexto
+{
+    public partial class Form1 : Form
+    {
         private SearchForm currentSearchForm;
         private string currentAlgorithm;
 
-        public Form1() {
+        public Form1()
+        {
             InitializeComponent();
         }
 
-        private void novoToolStripMenuItem_Click(object sender, EventArgs e) {
+        private void novoToolStripMenuItem_Click(object sender, EventArgs e)
+        {
             texto.Text = "";
         }
 
-        private void sobreToolStripMenuItem_Click(object sender, EventArgs e) {
+        private void sobreToolStripMenuItem_Click(object sender, EventArgs e)
+        {
             MessageBox.Show(this,
-               "Busca em Texto - 2026/1\n\nDesenvolvido por:\n72500964 - Otávio Tadeu Magalhães Ferreira\nProf. Virgílio Borges de Oliveira\n\nAlgoritmos e Estruturas de Dados II\nFaculdade COTEMIG\nSomente para fins didáticos.",
+               "Busca em Texto - 2026/1\n\nDesenvolvido por:\n72500964 - Otávio Tadeu Magalhães Ferreira\n72500344 - João Gabriel Oliveira Félix\nProf. Virgílio Borges de Oliveira\n\nAlgoritmos e Estruturas de Dados II\nFaculdade COTEMIG\nSomente para fins didáticos.",
                "Sobre o trabalho...",
                MessageBoxButtons.OK,
                MessageBoxIcon.Information);
         }
 
         private void abrirToolStripMenuItem_Click(object sender, EventArgs e)
-{
-    using (OpenFileDialog ofd = new OpenFileDialog())
-    {
-        ofd.Filter = "Arquivos de Texto e RTF|*.txt;*.rtf|Arquivos de Texto (*.txt)|*.txt|Rich Text Format (*.rtf)|*.rtf";
-
-        if (ofd.ShowDialog() == DialogResult.OK)
         {
-            try
+            using (OpenFileDialog ofd = new OpenFileDialog())
             {
-                // Tenta abrir como rtf primeiro
-                if (ofd.FileName.EndsWith(".rtf", StringComparison.OrdinalIgnoreCase))
+                ofd.Filter = "Arquivos de Texto e RTF|*.txt;*.rtf|Arquivos de Texto (*.txt)|*.txt|Rich Text Format (*.rtf)|*.rtf";
+
+                if (ofd.ShowDialog() == DialogResult.OK)
                 {
                     try
                     {
-                        texto.LoadFile(ofd.FileName, RichTextBoxStreamType.RichText);
+                        // Tenta abrir como rtf primeiro
+                        if (ofd.FileName.EndsWith(".rtf", StringComparison.OrdinalIgnoreCase))
+                        {
+                            try
+                            {
+                                texto.LoadFile(ofd.FileName, RichTextBoxStreamType.RichText);
+                            }
+                            catch (ArgumentException)
+                            {
+                                // Se falhar, significa que é um .txt disfarçado de .rtf
+                                // Então lê como texto puro em UTF-8
+                                string conteudo = File.ReadAllText(ofd.FileName, System.Text.Encoding.UTF8);
+                                texto.Text = conteudo;
+                            }
+                        }
+                        else
+                        {
+                            // Se for .txt de fábrica, lê direto como texto puro UTF-8
+                            string conteudo = File.ReadAllText(ofd.FileName, System.Text.Encoding.UTF8);
+                            texto.Text = conteudo;
+                        }
                     }
-                    catch (ArgumentException)
+                    catch (Exception ex)
                     {
-                        // Se falhar, significa que é um .txt disfarçado de .rtf
-                        // Então lê como texto puro em UTF-8
-                        string conteudo = File.ReadAllText(ofd.FileName, System.Text.Encoding.UTF8);
-                        texto.Text = conteudo;
+                        MessageBox.Show($"Erro crítico ao abrir o arquivo: {ex.Message}", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
-                else
-                {
-                    // Se for .txt de fábrica, lê direto como texto puro UTF-8
-                    string conteudo = File.ReadAllText(ofd.FileName, System.Text.Encoding.UTF8);
-                    texto.Text = conteudo;
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Erro crítico ao abrir o arquivo: {ex.Message}", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-    }
-}
 
-        private void sairToolStripMenuItem_Click(object sender, EventArgs e) {
+        private void sairToolStripMenuItem_Click(object sender, EventArgs e)
+        {
             Application.Exit();
         }
 
-        private void forcaBrutaToolStripMenuItem_Click(object sender, EventArgs e) {
+        private void forcaBrutaToolStripMenuItem_Click(object sender, EventArgs e)
+        {
             OpenSearchForm("Força Bruta");
         }
 
-        private void rabinKarpToolStripMenuItem_Click(object sender, EventArgs e) {
+        private void rabinKarpToolStripMenuItem_Click(object sender, EventArgs e)
+        {
             OpenSearchForm("Rabin-Karp");
         }
 
-        private void kmpToolStripMenuItem_Click(object sender, EventArgs e) {
+        private void kmpToolStripMenuItem_Click(object sender, EventArgs e)
+        {
             OpenSearchForm("KMP");
         }
 
-        private void boyerMooreToolStripMenuItem_Click(object sender, EventArgs e) {
+        private void boyerMooreToolStripMenuItem_Click(object sender, EventArgs e)
+        {
             OpenSearchForm("Boyer-Moore");
         }
 
-        private void OpenSearchForm(string algorithm) {
-            if (currentSearchForm != null && !currentSearchForm.IsDisposed) {
+        private void OpenSearchForm(string algorithm)
+        {
+            if (currentSearchForm != null && !currentSearchForm.IsDisposed)
+            {
                 currentSearchForm.Close();
             }
             currentAlgorithm = algorithm;
@@ -93,7 +106,8 @@ namespace BuscaTexto {
             currentSearchForm.Show(this);
         }
 
-        private void LimparDestaques() {
+        private void LimparDestaques()
+        {
             int selStart = texto.SelectionStart;
             int selLength = texto.SelectionLength;
             texto.SelectAll();
@@ -101,33 +115,38 @@ namespace BuscaTexto {
             texto.Select(selStart, selLength);
         }
 
-        private void SearchForm_OnSearch(object sender, EventArgs e) {
+        private void SearchForm_OnSearch(object sender, EventArgs e)
+        {
             RealizarBusca(false);
         }
 
-        private void SearchForm_OnReplace(object sender, EventArgs e) {
+        private void SearchForm_OnReplace(object sender, EventArgs e)
+        {
             RealizarBusca(true);
         }
 
-        private void RealizarBusca(bool replace) {
+        private void RealizarBusca(bool replace)
+        {
             if (currentSearchForm == null) return;
             string pattern = currentSearchForm.Pattern;
             string replaceWith = currentSearchForm.ReplaceWith;
             bool caseSensitive = currentSearchForm.CaseSensitive;
-            
+
             LimparDestaques();
 
             string t = texto.Text;
             string p = pattern;
 
-            if (!caseSensitive) {
+            if (!caseSensitive)
+            {
                 t = t.ToLower();
                 p = p.ToLower();
             }
 
             System.Collections.Generic.List<int> posicoes = new System.Collections.Generic.List<int>();
 
-            switch (currentAlgorithm) {
+            switch (currentAlgorithm)
+            {
                 case "Força Bruta":
                     posicoes = BuscaForcaBruta.ForcaBruta(p, t);
                     break;
@@ -142,20 +161,26 @@ namespace BuscaTexto {
                     break;
             }
 
-            if (posicoes.Count == 0) {
+            if (posicoes.Count == 0)
+            {
                 MessageBox.Show(this, "Nenhuma ocorrência encontrada.", "Resultado da Busca");
                 return;
             }
 
-            if (replace) {
+            if (replace)
+            {
                 posicoes.Reverse();
-                foreach (int pos in posicoes) {
+                foreach (int pos in posicoes)
+                {
                     texto.Select(pos, pattern.Length);
                     texto.SelectedText = replaceWith;
                 }
                 MessageBox.Show(this, $"{posicoes.Count} ocorrências substituídas.", "Substituir");
-            } else {
-                foreach (int pos in posicoes) {
+            }
+            else
+            {
+                foreach (int pos in posicoes)
+                {
                     texto.Select(pos, pattern.Length);
                     texto.SelectionBackColor = System.Drawing.Color.Yellow;
                 }

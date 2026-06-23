@@ -24,9 +24,10 @@ Este projeto é uma aplicação desktop Windows Forms (C#) projetada para demons
 - **Linguagem:** C# (.NET Framework)
 - **Interface:** Windows Forms
 
-## Desenvolvedor
+## Desenvolvedores
 
 - **Otávio Tadeu Magalhães Ferreira** (72500964)
+- **João Gabriel Oliveira Félix** (72500344)
 - **Professor:** Virgílio Borges de Oliveira
 
 *Este projeto possui finalidades puramente didáticas e acadêmicas.*
